@@ -16,8 +16,9 @@ cc_library(
     defs = [
         'DMLC_USE_CXX11'
     ],
-	deps = [
-		':meta_proto'
-	]
+    deps = [
+        ':meta_proto',
+        '//thirdparty/zeromq:zmq'
+    ]
 )
 
