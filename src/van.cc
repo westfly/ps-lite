@@ -9,7 +9,7 @@
 #include "ps/internal/postoffice.h"
 #include "ps/internal/customer.h"
 #include "./network_utils.h"
-#include "./meta.pb.h"
+#include "thirdparty/ps-lite/src/meta.pb.h"
 #include "./zmq_van.h"
 #include "./resender.h"
 namespace ps {
@@ -87,7 +87,7 @@ void Van::ProcessAddNodeCommandAtScheduler(
     auto dead_nodes = Postoffice::Get()->GetDeadNodes(heartbeat_timeout_);
     std::unordered_set<int> dead_set(dead_nodes.begin(), dead_nodes.end());
     // send back the recovery node
-    CHECK_EQ(recovery_nodes->control.node.size(), 1);
+    CHECK_EQ(recovery_nodes->control.node.size(), 1U);
     Connect(recovery_nodes->control.node[0]);
     Postoffice::Get()->UpdateHeartbeat(recovery_nodes->control.node[0].id, t);
     Message back;
@@ -114,7 +114,7 @@ void Van::UpdateLocalID(Message* msg, std::unordered_set<int>* deadnodes_set,
   // assign an id
   if (msg->meta.sender == Meta::kEmpty) {
     CHECK(is_scheduler_);
-    CHECK_EQ(ctrl.node.size(), 1);
+    CHECK_EQ(ctrl.node.size(), 1U);
     if (nodes->control.node.size() < num_nodes) {
       nodes->control.node.push_back(ctrl.node[0]);
     } else {
