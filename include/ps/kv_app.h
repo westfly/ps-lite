@@ -310,11 +310,13 @@ class KVServer : public SimpleApp {
   using ReqHandle = std::function<void(const KVMeta& req_meta,
                                        const KVPairs<Val>& req_data,
                                        KVServer* server)>;
+  using SimpleApp::set_request_handle;
   void set_request_handle(const ReqHandle& request_handle) {
     CHECK(request_handle) << "invalid request handle";
     request_handle_ = request_handle;
   }
-
+  // https://stackoverflow.com/questions/18515183/c-overloaded-virtual-function-warning-by-clang
+  using SimpleApp::Response;
   /**
    * \brief response to the push/pull request
    * \param req the meta-info of the request
