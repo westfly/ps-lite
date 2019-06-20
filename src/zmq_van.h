@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <thread>
 #include <string>
+#include <iostream>
 #include "ps/internal/van.h"
 #if _MSC_VER
 #define rand_r(x) rand()
