@@ -9,7 +9,11 @@
 #include "ps/internal/postoffice.h"
 #include "ps/internal/customer.h"
 #include "./network_utils.h"
-#include "./meta.pb.h"
+#ifndef DMLC_USE_BLADE
+    #include "./meta.pb.h"
+#else
+    #include "thirdparty/ps-lite/src/meta.pb.h"
+#endif
 #include "./zmq_van.h"
 #include "./resender.h"
 namespace ps {
