@@ -14,7 +14,11 @@
 #include "./network_utils.h"
 #include "./ibverbs_van.h"
 #include "./network_utils.h"
-#include "thirdparty/ps-lite/src/meta.pb.h"
+#ifndef DMLC_USE_BLADE
+    #include "./meta.pb.h"
+#else
+    #include "thirdparty/ps-lite/src/meta.pb.h"
+#endif
 #include "./zmq_van.h"
 #include "./resender.h"
 #include "./zmq_van.h"
