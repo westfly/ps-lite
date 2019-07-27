@@ -662,6 +662,7 @@ int KVWorker<Val>::AddPullCB(
     const SArray<Key>& keys, C* vals, D* lens, int cmd,
     const Callback& cb) {
   int ts = obj_->NewRequest(kServerGroup);
+  // 注册异步的拉取回调
   AddCallback(ts, [this, ts, keys, vals, lens, cb]() mutable {
       mu_.lock();
       auto& kvs = recv_kvs_[ts];
@@ -680,6 +681,7 @@ int KVWorker<Val>::AddPullCB(
       CHECK_EQ(total_key, keys.size()) << "lost some servers?";
 
       // fill vals and lens
+      // 避免接受和发送的时候时序不一致 ?
       std::sort(kvs.begin(), kvs.end(), [](
           const KVPairs<Val>& a, const KVPairs<Val>& b) {
                   return a.keys.front() < b.keys.front();
@@ -692,6 +694,7 @@ int KVWorker<Val>::AddPullCB(
       }
       Val* p_vals = vals->data();
       int *p_lens = nullptr;
+      // 需要得到 lens 信息
       if (lens) {
         if (lens->empty()) {
           lens->resize(keys.size());
@@ -712,7 +715,7 @@ int KVWorker<Val>::AddPullCB(
       mu_.lock();
       recv_kvs_.erase(ts);
       mu_.unlock();
-      if (cb) cb();
+      if (cb) cb(); // 异步情况下，可能有些资源释放和对拉取的Vals进行的处理
     });
 
   return ts;
