@@ -248,8 +248,7 @@ class KVWorker : public SimpleApp {
   /**
    * \brief send the kv list to all servers
    * @param timestamp the timestamp of the request
-   * @param push whether or not it is a push request
-   * @param cmd command
+   * @param push whether or not it is a push request * @param cmd command
    */
   void Send(int timestamp, bool push, int cmd, const KVPairs<Val>& kvs);
   /** \brief internal receive handle */
@@ -552,6 +551,7 @@ template <typename C, typename D>
 int KVWorker<Val>::Pull_(
     const SArray<Key>& keys, C* vals, D* lens, int cmd, const Callback& cb) {
   int ts = obj_->NewRequest(kServerGroup);
+  // 注册异步的拉取回调
   AddCallback(ts, [this, ts, keys, vals, lens, cb]() mutable {
       mu_.lock();
       auto& kvs = recv_kvs_[ts];
@@ -570,6 +570,7 @@ int KVWorker<Val>::Pull_(
       CHECK_EQ(total_key, keys.size()) << "lost some servers?";
 
       // fill vals and lens
+      // 避免接受和发送的时候时序不一致 ?
       std::sort(kvs.begin(), kvs.end(), [](
           const KVPairs<Val>& a, const KVPairs<Val>& b) {
                   return a.keys.front() < b.keys.front();
@@ -582,6 +583,7 @@ int KVWorker<Val>::Pull_(
       }
       Val* p_vals = vals->data();
       int *p_lens = nullptr;
+      // 需要得到 lens 信息
       if (lens) {
         if (lens->empty()) {
           lens->resize(keys.size());
@@ -602,10 +604,11 @@ int KVWorker<Val>::Pull_(
       mu_.lock();
       recv_kvs_.erase(ts);
       mu_.unlock();
-      if (cb) cb();
+      if (cb) cb(); // 异步情况下，可能有些资源释放和对拉取的Vals进行的处理
     });
 
   KVPairs<Val> kvs; kvs.keys = keys;
+  // 拉取请求
   Send(ts, false, cmd, kvs);
   return ts;
 }
