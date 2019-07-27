@@ -3,7 +3,11 @@
  */
 #ifndef PS_ZMQ_VAN_H_
 #define PS_ZMQ_VAN_H_
-#include "zeromq/zmq.h"
+#ifndef DMLC_USE_BLADE
+    #include <zmq.h>
+#else
+    #include "zeromq/zmq.h"
+#endif
 #include <stdlib.h>
 #include <thread>
 #include <string>

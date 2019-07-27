@@ -15,7 +15,8 @@ cc_library(
     ],
     defs = [
         'DMLC_USE_CXX11',
-        'DMLC_USE_GLOG'
+        'DMLC_USE_GLOG',
+        'DMLC_USE_BLADE',
     ],
     deps = [
         ':meta_proto',
