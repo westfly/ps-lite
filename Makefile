@@ -19,6 +19,17 @@ endif
 
 INCPATH = -I./src -I./include -I$(DEPS_PATH)/include
 CFLAGS = -std=c++11 -msse2 -fPIC -O3 -ggdb -Wall -finline-functions $(INCPATH) $(ADD_CFLAGS)
+LIBS = -pthread
+
+ifdef USE_IBVERBS
+LIBS += -lrdmacm -libverbs
+CFLAGS += -DDMLC_USE_IBVERBS
+endif
+
+ifdef ASAN
+CFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
+endif
+
 
 all: ps test
 
@@ -39,8 +50,8 @@ build/libps.a: $(OBJS)
 
 build/%.o: src/%.cc ${ZMQ} src/meta.pb.h
 	@mkdir -p $(@D)
-	$(CXX) $(INCPATH) -std=c++0x -MM -MT build/$*.o $< >build/$*.d
-	$(CXX) $(CFLAGS) -c $< -o $@
+	$(CXX) $(INCPATH) -std=c++11 -MM -MT build/$*.o $< >build/$*.d
+	$(CXX) $(CFLAGS) $(LIBS) -c $< -o $@
 
 src/%.pb.cc src/%.pb.h : src/%.proto ${PROTOBUF}
 	$(PROTOC) --cpp_out=./src --proto_path=./src $<

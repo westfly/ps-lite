@@ -3,15 +3,17 @@
  */
 #ifndef PS_ZMQ_VAN_H_
 #define PS_ZMQ_VAN_H_
+#include <stdio.h>
+#include <stdlib.h>
 #ifndef DMLC_USE_BLADE
     #include <zmq.h>
 #else
     #include "zeromq/zmq.h"
 #endif
-#include <stdlib.h>
-#include <thread>
+
 #include <string>
 #include <iostream>
+#include <unordered_map>
 #include "ps/internal/van.h"
 #if _MSC_VER
 #define rand_r(x) rand()
@@ -23,7 +25,7 @@ namespace ps {
  */
 inline void FreeData(void *data, void *hint) {
   if (hint == NULL) {
-    delete [] static_cast<char*>(data);
+    delete[] static_cast<char*>(data);
   } else {
     delete static_cast<SArray<char>*>(hint);
   }
@@ -34,8 +36,8 @@ inline void FreeData(void *data, void *hint) {
  */
 class ZMQVan : public Van {
  public:
-  ZMQVan() { }
-  virtual ~ZMQVan() { }
+  ZMQVan() {}
+  virtual ~ZMQVan() {}
 
  protected:
   void Start(int customer_id) override {
@@ -81,8 +83,8 @@ class ZMQVan : public Van {
     }
     std::string addr = local ? "ipc:///tmp/" : "tcp://" + hostname + ":";
     int port = node.port;
-    unsigned seed = static_cast<unsigned>(time(NULL)+port);
-    for (int i = 0; i < max_retry+1; ++i) {
+    unsigned seed = static_cast<unsigned>(time(NULL) + port);
+    for (int i = 0; i < max_retry + 1; ++i) {
       auto address = addr + std::to_string(port);
       if (zmq_bind(receiver_, address.c_str()) == 0) break;
       if (i == max_retry) {
@@ -115,6 +117,11 @@ class ZMQVan : public Van {
     if (my_node_.id != Node::kEmpty) {
       std::string my_id = "ps" + std::to_string(my_node_.id);
       zmq_setsockopt(sender, ZMQ_IDENTITY, my_id.data(), my_id.size());
+      const char* watermark = Environment::Get()->find("DMLC_PS_WATER_MARK");
+      if (watermark) {
+        const int hwm = atoi(watermark);
+        zmq_setsockopt(sender, ZMQ_SNDHWM, &hwm, sizeof(hwm));
+      }
     }
     // connect
     std::string addr = "tcp://" + node.hostname + ":" + std::to_string(node.port);
@@ -213,11 +220,13 @@ class ZMQVan : public Van {
         // zero-copy
         SArray<char> data;
         data.reset(buf, size, [zmsg, size](char* buf) {
-            zmq_msg_close(zmsg);
-            delete zmsg;
-          });
+          zmq_msg_close(zmsg);
+          delete zmsg;
+        });
         msg->data.push_back(data);
-        if (!zmq_msg_more(zmsg)) { break; }
+        if (!zmq_msg_more(zmsg)) {
+          break;
+        }
       }
     }
     return recv_bytes;
@@ -255,10 +264,6 @@ class ZMQVan : public Van {
 }  // namespace ps
 
 #endif  // PS_ZMQ_VAN_H_
-
-
-
-
 
 // monitors the liveness other nodes if this is
 // a schedule node, or monitors the liveness of the scheduler otherwise

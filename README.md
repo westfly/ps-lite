@@ -1,5 +1,3 @@
-<img src="http://parameterserver.org/images/parameterserver.png"  width=400 />
-
 [![Build Status](https://travis-ci.org/dmlc/ps-lite.svg?branch=master)](https://travis-ci.org/dmlc/ps-lite)
 [![GitHub license](http://dmlc.github.io/img/apache2.svg)](./LICENSE)
 
@@ -34,11 +32,10 @@ can install it by
 ```
 sudo apt-get update && sudo apt-get install -y build-essential git
 ```
-Instructions for
-[older Ubuntu](http://ubuntuhandbook.org/index.php/2013/08/install-gcc-4-8-via-ppa-in-ubuntu-12-04-13-04/),
-[Centos](http://linux.web.cern.ch/linux/devtoolset/),
-and
-[Mac Os X](http://hpc.sourceforge.net/).
+Instructions for gcc 4.8 installation on other platforms:
+- [Ubuntu 12.04](http://ubuntuhandbook.org/index.php/2013/08/install-gcc-4-8-via-ppa-in-ubuntu-12-04-13-04/)
+- [Centos](http://linux.web.cern.ch/linux/devtoolset/)
+- [Mac Os X](http://hpc.sourceforge.net/).
 
 Then clone and build
 
@@ -52,38 +49,14 @@ cd ps-lite && make -j4
 `ps-lite` provides asynchronous communication for other projects: 
   - Distributed deep neural networks:
     [MXNet](https://github.com/dmlc/mxnet),
-    [CXXNET](https://github.com/dmlc/cxxnet) and
-    [Minverva](https://github.com/minerva-developers/minerva)
+    [CXXNET](https://github.com/dmlc/cxxnet),
+    [Minverva](https://github.com/minerva-developers/minerva), and
+    [BytePS](https://github.com/bytedance/byteps/)
   - Distributed high dimensional inference, such as sparse logistic regression,
     factorization machines:
     [DiFacto](https://github.com/dmlc/difacto)
     [Wormhole](https://github.com/dmlc/wormhole)
 
-### History
-
-We started to work on the parameter server framework since 2010.
-
-1. The first generation was
-designed and optimized for specific algorithms, such as logistic regression and
-LDA, to serve the sheer size industrial machine learning tasks (hundreds billions of
-examples and features with 10-100TB data size) .
-
-2. Later we tried to build a open-source general purpose framework for machine learning
-algorithms. The project is available at [dmlc/parameter_server](https://github.com/dmlc/parameter_server).
-
-3. Given the growing demands from other projects, we created `ps-lite`, which provides a clean data communication API and a
-lightweight implementation. The implementation is based on `dmlc/parameter_server`, but we refactored the job launchers, file I/O and machine
-learning algorithms codes into different projects such as `dmlc-core` and
-`wormhole`.
-
-4. From the experience we learned during developing
-   [dmlc/mxnet](https://github.com/dmlc/mxnet), we further refactored the API and implementation from [v1](https://github.com/dmlc/ps-lite/releases/tag/v1). The main
-   changes include
-   - less library dependencies
-   - more flexible user-defined callbacks, which facilitate other language
-   bindings
-   - let the users, such as the dependency
-     engine of mxnet, manage the data consistency
 
 ### Research papers
   1. Mu Li, Dave Andersen, Alex Smola, Junwoo Park, Amr Ahmed, Vanja Josifovski,

@@ -48,9 +48,18 @@ void RunWorker() {
   std::vector<float> rets;
   kv.Wait(kv.Pull(keys, &rets));
 
+  // pushpull
+  std::vector<float> outs;
+  for (int i = 0; i < repeat; ++i) {
+    // PushPull on the same keys should be called serially
+    kv.Wait(kv.PushPull(keys, vals, &outs));
+  }
+
   float res = 0;
+  float res2 = 0;
   for (int i = 0; i < num; ++i) {
-    res += fabs(rets[i] - vals[i] * repeat);
+    res += std::fabs(rets[i] - vals[i] * repeat);
+    res2 += std::fabs(outs[i] - vals[i] * 2 * repeat);
   }
   for (size_t i = 0; i < rets.size(); ++i) {
 	if (i % 1000 == 0) {
@@ -58,7 +67,8 @@ void RunWorker() {
 	}
   }
   CHECK_LT(res / repeat, 1e-5);
-  LL << "error: " << res / repeat;
+  CHECK_LT(res2 / (2 * repeat), 1e-5);
+  LL << "error: " << res / repeat << ", " << res2 / (2 * repeat);
 }
 
 int main(int argc, char *argv[]) {

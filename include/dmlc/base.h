@@ -21,6 +21,20 @@
 #define DMLC_LOG_FATAL_THROW 1
 #endif
 
+/*!
+ * \brief Whether to print stack trace for fatal error,
+ * enabled on linux when using gcc.
+ */
+#if (defined(__GNUC__) && !defined(__MINGW32__) && !defined(__sun) && !defined(__SVR4) && \
+     !(defined __MINGW64__) && !(defined __ANDROID__))
+#if (!defined(DMLC_LOG_STACK_TRACE))
+#define DMLC_LOG_STACK_TRACE 1
+#endif
+#if (!defined(DMLC_LOG_STACK_TRACE_SIZE))
+#define DMLC_LOG_STACK_TRACE_SIZE 10
+#endif
+#endif
+
 /*! \brief whether compile with hdfs support */
 #ifndef DMLC_USE_HDFS
 #define DMLC_USE_HDFS 0
@@ -47,7 +61,7 @@
 #if __GNUC__ == 4 && __GNUC_MINOR__ < 6
 #pragma message("Will need g++-4.6 or higher to compile all"           \
                 "the features in dmlc-core, "                           \
-                "compile without c++0x, some features may be disabled")
+                "compile without c++11, some features may be disabled")
 #undef DMLC_USE_CXX11
 #define DMLC_USE_CXX11 0
 #endif
@@ -129,7 +143,7 @@ namespace dmlc {
  * \param vec input vector
  * \return beginning address of a vector
  */
-template<typename T>
+template <typename T>
 inline T *BeginPtr(std::vector<T> &vec) {  // NOLINT(*)
   if (vec.size() == 0) {
     return NULL;
@@ -142,7 +156,7 @@ inline T *BeginPtr(std::vector<T> &vec) {  // NOLINT(*)
  * \param vec input vector
  * \return beginning address of a vector
  */
-template<typename T>
+template <typename T>
 inline const T *BeginPtr(const std::vector<T> &vec) {
   if (vec.size() == 0) {
     return NULL;
